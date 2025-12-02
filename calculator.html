@@ -17,23 +17,35 @@
     text-align: center;
     margin: 0 0 1.5rem;
     color: #2E8B57;
-  ">Рассчитайте вашу экономию</h3>
+  ">Рассчитайте Вашу выгоду</h3>
+
+  <div style="margin-bottom: 0.5rem;">
+    <label style="display: block; font-size: 14px; color: #555; font-weight: 600;">Выберите энергоресурс для
+      переработки:</label>
+  </div>
 
   <div style="display: flex; gap: 16px; margin-bottom: 1.5rem; flex-wrap: wrap;">
     <label style="flex: 1; min-width: 180px;">
-      <input type="radio" name="calc-type" value="electric" checked style="margin-right: 8px;">
-      Электрическая
+      <div>
+        <input type="radio" name="calc-type" value="electric" checked style="margin-right: 8px;">
+        Электрическая
+      </div>
+      <div style="font-size: 12px; color: #777; margin-left: 24px; margin-top: 4px;">от 50 кг до 2000 кг</div>
     </label>
     <label style="flex: 1; min-width: 180px;">
-      <input type="radio" name="calc-type" value="gas" style="margin-right: 8px;">
-      Газовая
+      <div>
+        <input type="radio" name="calc-type" value="gas" style="margin-right: 8px;">
+        Газовая
+      </div>
+      <div style="font-size: 12px; color: #777; margin-left: 24px; margin-top: 4px;">от 1000 кг</div>
     </label>
   </div>
 
   <div style="display: grid; gap: 16px; margin-bottom: 1.2rem;">
 
     <div>
-      <label style="display: block; font-size: 14px; margin-bottom: 6px; color: #555;">Объём отходов в сутки</label>
+      <label style="display: block; font-size: 14px; margin-bottom: 6px; color: #555;">Укажите вес органических
+        отходов</label>
       <div style="display: flex; gap: 8px;">
         <input type="number" id="waste-amount" placeholder="300" min="0" step="10"
           style="flex: 1; padding: 10px 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 15px;">
@@ -46,13 +58,15 @@
     </div>
 
     <div>
-      <label style="display: block; font-size: 14px; margin-bottom: 6px; color: #555;">Текущие расходы на утилизацию (руб/сут)</label>
-      <input type="number" id="current-cost" placeholder="5000" value="0" min="0"
+      <label style="display: block; font-size: 14px; margin-bottom: 6px; color: #555;">Текущие расходы на утилизацию
+        (руб/сут)</label>
+      <input type="number" id="current-cost" placeholder="5000" value="5000" min="0"
         style="width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 15px;">
     </div>
 
     <div id="energy-cost-label">
-      <label style="display: block; font-size: 14px; margin-bottom: 6px; color: #555;">Стоимость электроэнергии (руб/кВт·ч)</label>
+      <label style="display: block; font-size: 14px; margin-bottom: 6px; color: #555;">Стоимость электроэнергии
+        (руб/кВт·ч)</label>
       <input type="number" id="energy-cost" placeholder="10" value="10" min="0" step="0.1"
         style="width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 15px;">
     </div>
@@ -71,7 +85,7 @@
     cursor: pointer;
     transition: background 0.2s;
   " onmouseover="this.style.background='#257a4a'" onmouseout="this.style.background='#2E8B57'">
-    Рассчитать экономию
+    Рассчитать выгоду
   </button>
 
   <div id="calc-result" style="
@@ -87,91 +101,141 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  if (window.calculateWasteGaia) return;
+  document.addEventListener('DOMContentLoaded', function () {
+    if (window.calculateWasteGaia) return;
 
-  const electricData = [
-    { prod: 50, cons: 40 }, { prod: 100, cons: 100 }, { prod: 150, cons: 120 },
-    { prod: 200, cons: 160 }, { prod: 300, cons: 240 }, { prod: 400, cons: 320 },
-    { prod: 600, cons: 480 }, { prod: 1000, cons: 800 }, { prod: 1200, cons: 960 },
-    { prod: 2000, cons: 1600 }
-  ];
+    const electricData = [
+      { prod: 50, cons: 40 }, { prod: 100, cons: 100 }, { prod: 150, cons: 120 },
+      { prod: 200, cons: 160 }, { prod: 300, cons: 240 }, { prod: 400, cons: 320 },
+      { prod: 600, cons: 480 }, { prod: 1000, cons: 800 }, { prod: 1200, cons: 960 },
+      { prod: 2000, cons: 1600 }
+    ];
 
-  const gasDataKg = [
-    { prod: 1000, cons: 100 }, { prod: 1200, cons: 120 }, { prod: 2000, cons: 200 },
-    { prod: 5000, cons: 500 }, { prod: 10000, cons: 1000 }, { prod: 20000, cons: 2000 },
-    { prod: 50000, cons: 5000 }, { prod: 100000, cons: 10000 }, { prod: 200000, cons: 20000 },
-    { prod: 300000, cons: 30000 }
-  ];
+    const gasDataKg = [
+      { prod: 1000, cons: 100 }, { prod: 1200, cons: 120 }, { prod: 2000, cons: 200 },
+      { prod: 5000, cons: 500 }, { prod: 10000, cons: 1000 }, { prod: 20000, cons: 2000 },
+      { prod: 50000, cons: 5000 }, { prod: 100000, cons: 10000 }, { prod: 200000, cons: 20000 },
+      { prod: 300000, cons: 30000 }
+    ];
 
-  function findClosest(data, amount) {
-    const suitable = data.filter(d => d.prod >= amount);
-    return suitable.length ? suitable[0] : data[data.length - 1];
-  }
-
-  window.calculateWasteGaia = function() {
-    const type = document.querySelector('input[name="calc-type"]:checked').value;
-    let amount = parseFloat(document.getElementById('waste-amount').value);
-    const currentCost = parseFloat(document.getElementById('current-cost').value) || 0;
-    const energyPrice = parseFloat(document.getElementById('energy-cost').value) || 0;
-    const unit = document.getElementById('waste-unit').value;
-
-    if (isNaN(amount) || amount <= 0) {
-      alert('Пожалуйста, укажите объём отходов');
-      return;
+    function findClosest(data, amount) {
+      const suitable = data.filter(d => d.prod >= amount);
+      return suitable.length ? suitable[0] : data[data.length - 1];
     }
 
-    if (unit === 't') amount *= 1000;
-
-    let dataRow, energyName, energyUnit;
-    if (type === 'electric') {
-      dataRow = findClosest(electricData, amount);
-      energyName = 'электроэнергии';
-      energyUnit = 'кВт·ч';
-    } else {
-      dataRow = findClosest(gasDataKg, amount);
-      energyName = 'газа';
-      energyUnit = 'м³';
+    function getGaiaModel(capacity) {
+      if (capacity <= 50) return 'GC-50';
+      if (capacity <= 100) return 'GC-100';
+      if (capacity <= 150) return 'GC-150';
+      if (capacity <= 200) return 'GC-200';
+      if (capacity <= 300) return 'GC-300';
+      if (capacity <= 400) return 'GC-400';
+      if (capacity <= 600) return 'GC-600';
+      if (capacity <= 1000) return 'GC-1000';
+      if (capacity <= 1200) return 'GC-1200';
+      if (capacity <= 2000) return 'GC-2000';
+      if (capacity <= 5000) return 'GC-5T';
+      return 'GC-100T';
     }
 
-    const consDay = dataRow.cons;
-    const consHour = consDay / 24;
-    const dailyEnergyCost = consDay * energyPrice;
-    const dailySavings = currentCost - dailyEnergyCost;
-    const yearlySavings = dailySavings * 365;
+    window.calculateWasteGaia = function () {
+      const type = document.querySelector('input[name="calc-type"]:checked').value;
+      let amount = parseFloat(document.getElementById('waste-amount').value);
+      const currentCost = parseFloat(document.getElementById('current-cost').value) || 0;
+      const energyPrice = parseFloat(document.getElementById('energy-cost').value) || 0;
+      const unit = document.getElementById('waste-unit').value;
 
-    const resDiv = document.getElementById('calc-result');
-    resDiv.innerHTML = `
-      <div style="margin-bottom: 8px;"><strong>Подобрано оборудование:</strong> ${amount.toLocaleString()} кг/сут</div>
-      <div style="margin-bottom: 8px;">Потребление ${energyName}: ${consDay} ${energyUnit}/сут (${consHour.toFixed(2)} ${energyUnit}/ч)</div>
-      <div style="margin-bottom: 8px;">Стоимость энергии: <strong>${dailyEnergyCost.toLocaleString()} ₽/сут</strong></div>
-      <div style="margin-bottom: 12px;">Ваши текущие расходы: <strong>${currentCost.toLocaleString()} ₽/сут</strong></div>
+      if (isNaN(amount) || amount <= 0) {
+        alert('Пожалуйста, укажите вес органических отходов');
+        return;
+      }
+
+      if (unit === 't') amount *= 1000;
+
+      let dataRow, energyName, energyUnit;
+      if (type === 'electric') {
+        dataRow = findClosest(electricData, amount);
+        energyName = 'электроэнергии';
+        energyUnit = 'кВт·ч';
+      } else {
+        dataRow = findClosest(gasDataKg, amount);
+        energyName = 'газа';
+        energyUnit = 'м³';
+      }
+
+      const capacity = dataRow.prod;
+      const modelName = getGaiaModel(capacity);
+      const consDay = dataRow.cons;
+      const consHour = consDay / 24;
+      const dailyEnergyCost = consDay * energyPrice;
+      const dailySavings = currentCost - dailyEnergyCost;
+      const yearlySavings = dailySavings * 365;
+
+      // Calculate bonus from output product: input weight * 0.3 * 600 rubles
+      const outputWeight = amount * 0.3;
+      const dailyBonus = outputWeight * 600;
+
+      const resDiv = document.getElementById('calc-result');
+      resDiv.innerHTML = `
+      <div style="text-align: center; margin-bottom: 20px;">
+        <div style="font-size: 28px; font-weight: 700; color: #2E8B57; margin-bottom: 10px;">${modelName}</div>
+        <div style="font-size: 16px; color: #555; margin-bottom: 15px;">Узнать цену от 3,5 млн ₽</div>
+        <div style="font-size: 15px; color: #333; margin-bottom: 8px;">
+          <strong>Телефон офиса:</strong> <a href="tel:+78123851005" style="color: #2E8B57; text-decoration: none;">+7 812 385 10 05</a>
+        </div>
+      </div>
+
+      <div style="padding: 15px; background: white; border-radius: 10px; margin-bottom: 15px;">
+        <div style="font-size: 14px; font-weight: 600; margin-bottom: 10px; text-align: center;">Укажите Ваш номер, мы направим Вам предложение</div>
+        <input type="tel" id="user-phone" placeholder="+7 (___) ___-__-__" style="width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 15px; margin-bottom: 8px; box-sizing: border-box;">
+        <button onclick="alert('Спасибо! Мы свяжемся с Вами в ближайшее время.')" style="width: 100%; padding: 10px; background: #2E8B57; color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer;" onmouseover="this.style.background='#257a4a'" onmouseout="this.style.background='#2E8B57'">Отправить запрос</button>
+      </div>
+
+      <div style="margin-bottom: 12px; padding: 10px; background: rgba(46, 139, 87, 0.08); border-radius: 10px;">
+        <div style="margin-bottom: 8px;"><strong>Подобрано оборудование:</strong> ${capacity.toLocaleString()} кг/сут</div>
+        <div style="margin-bottom: 8px;">Потребление ${energyName}: ${consDay} ${energyUnit}/сут (${consHour.toFixed(2)} ${energyUnit}/ч)</div>
+        <div style="margin-bottom: 8px;">Стоимость энергии: <strong>${dailyEnergyCost.toLocaleString()} ₽/сут</strong></div>
+        <div>Ваши текущие расходы: <strong>${currentCost.toLocaleString()} ₽/сут</strong></div>
+      </div>
       
-      <div style="padding: 10px; background: white; border-radius: 10px; margin-top: 10px;">
+      <div style="padding: 15px; background: white; border-radius: 10px; border: 2px solid #2E8B57;">
+        <div style="font-size: 14px; margin-bottom: 8px; color: #555;">
+          Было отходов: <strong>${amount.toLocaleString()} кг</strong><br>
+          Выходящий продукт: <strong>${outputWeight.toLocaleString()} кг</strong> (${amount.toLocaleString()} кг × 0,3)
+        </div>
+        <div style="font-size: 18px; font-weight: 700; color: #2E8B57; text-align: center; margin-top: 10px;">
+          Бонус до ${(dailyBonus / 1000).toLocaleString()} тыс. ₽/сутки
+        </div>
+        <div style="font-size: 13px; color: #777; text-align: center; margin-top: 5px;">
+          при реализации выходящего продукта
+        </div>
+      </div>
+
+      <div style="padding: 10px; background: rgba(46, 139, 87, 0.08); border-radius: 10px; margin-top: 15px;">
         <div>Ежедневная экономия: <strong style="color: ${dailySavings >= 0 ? '#2E8B57' : '#d32f2f'}">${dailySavings >= 0 ? '+' : ''}${dailySavings.toLocaleString()} ₽/сут</strong></div>
         <div>Годовая экономия: <strong style="color: ${yearlySavings >= 0 ? '#2E8B57' : '#d32f2f'}">${yearlySavings >= 0 ? '+' : ''}${yearlySavings.toLocaleString()} ₽/год</strong></div>
       </div>
     `;
-    resDiv.style.display = 'block';
-  };
+      resDiv.style.display = 'block';
+    };
 
-  document.querySelectorAll('input[name="calc-type"]').forEach(radio => {
-    radio.addEventListener('change', () => {
-      const labelWrap = document.getElementById('energy-cost-label');
-      if (radio.value === 'electric') {
-        labelWrap.innerHTML = `
+    document.querySelectorAll('input[name="calc-type"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        const labelWrap = document.getElementById('energy-cost-label');
+        if (radio.value === 'electric') {
+          labelWrap.innerHTML = `
           <label style="display: block; font-size: 14px; margin-bottom: 6px; color: #555;">Стоимость электроэнергии (руб/кВт·ч)</label>
           <input type="number" id="energy-cost" placeholder="10" value="10" min="0" step="0.1"
             style="width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 15px;">
         `;
-      } else {
-        labelWrap.innerHTML = `
+        } else {
+          labelWrap.innerHTML = `
           <label style="display: block; font-size: 14px; margin-bottom: 6px; color: #555;">Стоимость газа (руб/м³)</label>
           <input type="number" id="energy-cost" placeholder="10" value="10" min="0" step="0.1"
             style="width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 15px;">
         `;
-      }
+        }
+      });
     });
   });
-});
 </script>
