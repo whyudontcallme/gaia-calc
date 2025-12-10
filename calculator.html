@@ -172,7 +172,7 @@
 
     /* Пример расчёта — на всю ширину */
     #example-section {
-      margin-top: 24px;
+      margin-bottom: 24px;
       padding: 16px;
       background: #f0fff0;
       border-left: 4px solid #2E8B57;
@@ -269,6 +269,40 @@
     .partner-card.full {
       flex: 1;
     }
+
+    @media (max-width: 768px) {
+      .partner-cards {
+        flex-direction: column;
+      }
+
+      .partner-card {
+        width: 100%;
+        min-height: auto;
+      }
+
+      #calculator-container {
+        padding: 1.5rem 1rem;
+      }
+
+      .header h1 {
+        font-size: 20px;
+      }
+
+      .form-row {
+        flex-direction: column;
+      }
+
+      .unit-select {
+        width: 100%;
+        margin-top: 8px;
+      }
+
+      #example-section {
+        border-left: none;
+        border-top: 4px solid #2E8B57;
+        border-radius: 0 0 8px 8px;
+      }
+    }
   </style>
 </head>
 
@@ -281,6 +315,12 @@
 
     <!-- Калькулятор -->
     <div id="calculator-container">
+      <div id="example-section">
+        <strong>📌 Пример расчёта:</strong><br>
+        Столовая с <strong>1000 кг пищевых отходов в сутки</strong> (расход на вывоз 30 000 рублей).<br>
+        (Установка GAIA-GG-1000H (газовая) расходует <strong>100 м³ газа</strong>. Экономия <strong>29 000 рублей в
+          сутки</strong> — <strong>10 585 000 рублей в год</strong>)
+      </div>
       <div class="tab-group">
         <div class="tab active" data-tab="electric">Электрическая</div>
         <div class="tab" data-tab="gas">Газовая</div>
@@ -322,14 +362,7 @@
       <div id="result"></div>
 
       <!-- Пример расчёта — на всю ширину -->
-      <div id="example-section">
-        <strong>📌 Пример расчёта:</strong><br>
-        Ресторан с <strong>1000 кг отходов/сут</strong> платит <strong>30 000 ₽/сут</strong> за вывоз.<br>
-        Установка GAIA GG-1000H (газовая) расходует <strong>100 м³ газа</strong> (10 ₽/м³ → <strong>1 000
-          ₽/сут</strong>).<br>
-        <strong>Экономия: 29 000 ₽/сут → 10 585 000 ₽ в год.</strong><br>
-        <em>Это в 30 раз дешевле!</em>
-      </div>
+
     </div>
 
     <!-- Баннеры — растянуты на всю ширину с большими фото -->
